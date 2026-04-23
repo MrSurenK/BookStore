@@ -5,13 +5,15 @@ import com.example.bookstore.utility.ValidISBN;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 @Entity
-@Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Book {
 
     @Id
@@ -43,4 +45,13 @@ public class Book {
 
     @Column(nullable = false)
     private boolean isDeleted = false; //Defaults to false
+
+    //Check that this is field not empty or null before saving to DB a new record or an update
+    @PrePersist
+    @PreUpdate
+    private void validate() throws IllegalAccessException {
+        if(authors == null || authors.isEmpty()){
+            throw new IllegalAccessException("Book must be authored by someone!");
+        }
+    }
 }
