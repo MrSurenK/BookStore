@@ -13,13 +13,15 @@ import java.util.Set;
 public class Author {
 
     @Id
-    private long id; //will manually create authors so no need to generate id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id; //User need to add author if author does not exist in database
 
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private LocalDate birthday;
 
     @ManyToMany(mappedBy = "authors")
-    private Set<Book> books;
+    private Set<Book> books; //User will first initialize empty book for new author and add author in Book table
 }
