@@ -6,6 +6,7 @@ import com.example.bookstore.dto.Res;
 import com.example.bookstore.dto.UpdateBookDTO;
 import com.example.bookstore.model.Book;
 import com.example.bookstore.service.BookService;
+import com.example.bookstore.utility.ValidISBN;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -52,11 +53,23 @@ public class BookController {
 
         List<Book> books = bookService.findBook(title, authorNames);
 
-        return ResponseEntity.status(200).body(Res.success(null, "Search completed"));
+        return ResponseEntity.status(200).body(Res.success(books, "Search completed"));
+    }
+
+    @DeleteMapping("/{isbn}")
+    public ResponseEntity<Res<Object>> deleteBookApi(@PathVariable @ValidISBN String isbn){
+
+        bookService.deleteBook(isbn);
+
+        return ResponseEntity.status(200).body(Res.success(null, "Book deleted"));
     }
 
 
-
+    @GetMapping("/allBooks")
+    public ResponseEntity<Res<Object>> getAllBooks(){
+        List<Book> books = bookService.getAllBooks();
+        return ResponseEntity.status(200).body(Res.success(books, "All books available in store"));
+    }
 
 }
 

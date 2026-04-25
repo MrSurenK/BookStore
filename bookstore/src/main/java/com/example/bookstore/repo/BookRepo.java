@@ -9,15 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepo extends JpaRepository<Book, String > {
-
-
     Optional<Book> findBookByIdAndIsDeletedFalse(String isbn); //only want book that are not deleted
-
 
     @Query("""
             SELECT DISTINCT b FROM Book b 
             LEFT JOIN b.authors a 
             WHERE 
+                b.isDeleted = false
                 (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
                 OR 
                 (:authorNames IS NULL OR LOWER(a.name) IN :authorNames) 
@@ -26,6 +24,9 @@ public interface BookRepo extends JpaRepository<Book, String > {
                                          @Param("authorNames") List<String> authorName);
 
 
-
+    @Query("""
+            SELECT * FROM Book b WHERE isDeleted=false
+            """)
+    List<Book> getAllNonDeletedBooks();
 
 }

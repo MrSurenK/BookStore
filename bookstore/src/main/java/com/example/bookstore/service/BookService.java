@@ -51,6 +51,8 @@ public class BookService {
         bookRepo.save(newBook); //save new book
     }
 
+
+    //Helper method
     private Set<Author> checkAuthors(Set<AuthorIdentifierDTO> authors){
 
         Set<Author> validAuthors = new HashSet<>();
@@ -155,6 +157,18 @@ public class BookService {
     }
 
 
+    public void deleteBook(String isbn){
+        //ISBN numbers validated at controller layer
+        Book book = bookRepo.findBookByIdAndIsDeletedFalse(isbn).orElseThrow(()-> new EntityNotFoundException("No such book found in store"));
+        log.info("Attempting to delete book : {}" , isbn);
+        book.setDeleted(true);
+        bookRepo.save(book);
+        log.info("Book deleted");
+    }
 
 
+    public List<Book> getAllBooks(){
+        log.info("Getting all books in store");
+       return bookRepo.getAllNonDeletedBooks();
+    }
 }
