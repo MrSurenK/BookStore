@@ -27,7 +27,11 @@ Requirements:
       2. Manager -> Add a book, Update a book, find a book
       3. Owner -> Access all APIs + Delete a book
 
-Set up guide:
+4. Table Relationship: Many to Many relationship between Books and Authors
+   Tables:
+5. User
+6. Book
+7. Author
+8. Enum Roles
 
-1. Docker set up for DB and Backend Service
-2. Manually fill in user details (no endpoints for user creation)
+Refer to setup guide document to get started.
