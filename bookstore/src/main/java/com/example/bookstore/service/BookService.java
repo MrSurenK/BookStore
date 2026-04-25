@@ -13,11 +13,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.bookstore.mapper.BookMapper;
+import com.example.bookstore.utility.BookMapper;
+import com.example.bookstore.customExceptions.BadRequestException;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -37,22 +39,47 @@ public class BookService {
     @Transactional
     public void addNewBook(AddNewBookDTO newBookDetails){
 
+        // Check if a book with this ISBN exists (deleted or not)
+        Optional<Book> existingOpt = bookRepo.findById(newBookDetails.isbn());
 
+        if (existingOpt.isPresent()){
+            Book existing = existingOpt.get();
+            if (!existing.isDeleted()){
+                // active book exists -> duplicate
+                throw new BadRequestException("Book with ISBN " + newBookDetails.isbn() + " already exists");
+            }
+
+            // book exists but was soft-deleted -> reactivate it and update fields
+            Set<Author> authors = checkAuthors(newBookDetails.authors());
+            log.debug("Reactivating deleted book {} with authors {}", newBookDetails.isbn(), authors);
+
+            existing.setDeleted(false);
+            existing.setTitle(newBookDetails.title());
+            existing.setAuthors(authors);
+            existing.setYear(newBookDetails.year());
+            existing.setPrice(newBookDetails.price());
+            existing.setGenre(newBookDetails.genre());
+
+            bookRepo.save(existing);
+            log.info("Reactivated book with ISBN {}", newBookDetails.isbn());
+            return;
+        }
+
+        // No existing book at all -> create new
         Set<Author> authors = checkAuthors(newBookDetails.authors());
-
         log.debug("Checking authors: {} ", authors);
 
-        //Map new books details to book to create new book
-       Book newBook =  Book.builder()
-                        .isbn(newBookDetails.isbn())
-                                .title(newBookDetails.title())
-                                        .authors(authors) //Validate authors first
-                                            .year(newBookDetails.year())
-                                                .price(newBookDetails.price())
-                                                    .genre(newBookDetails.genre())
-                                                            .build();
+        // Map new book details to book to create new book
+        Book newBook = Book.builder()
+                .isbn(newBookDetails.isbn())
+                .title(newBookDetails.title())
+                .authors(authors) // Validate authors first
+                .year(newBookDetails.year())
+                .price(newBookDetails.price())
+                .genre(newBookDetails.genre())
+                .build();
 
-        bookRepo.save(newBook); //save new book
+        bookRepo.save(newBook); // save new book
         log.info("Book added");
     }
 

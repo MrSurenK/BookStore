@@ -1,4 +1,4 @@
-package com.example.bookstore.mapper;
+package com.example.bookstore.utility;
 
 import com.example.bookstore.dto.AuthorResDTO;
 import com.example.bookstore.dto.BookResponseDTO;
@@ -10,13 +10,15 @@ import java.util.List;
 public class BookMapper {
 
     public static BookResponseDTO toDTO(Book book) {
+        List<AuthorResDTO> authors = book.getAuthors() == null ? List.of() : book.getAuthors()
+                .stream()
+                .map(BookMapper::toDTO)
+                .toList();
+
         return new BookResponseDTO(
                 book.getIsbn(),
                 book.getTitle(),
-                book.getAuthors()
-                        .stream()
-                        .map(BookMapper::toDTO)
-                        .toList(),
+                authors,
                 book.getYear(),
                 book.getPrice(),
                 book.getGenre(),

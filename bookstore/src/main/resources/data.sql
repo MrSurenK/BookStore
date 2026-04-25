@@ -29,8 +29,12 @@ INSERT INTO book_author (book_isbn, author_id) VALUES
   ('9780262033848', 4);
 
 -- One user per role
-INSERT INTO `user` (id, username, password, role) VALUES
-  (1, 'user_demo', 'password_user', 'USER'),
-  (2, 'manager_demo', 'password_manager', 'MANAGER'),
-  (3, 'owner_demo', 'password_owner', 'OWNER');
+-- NOTE: user rows commented out to avoid storing plaintext passwords in source.
+-- Use the /api/auth/register endpoint to create users (recommended). Example:
+-- POST /api/auth/register
+-- {
+--   "username": "owner_demo",
+--   "password": "password_owner",
+--   "role": "OWNER"
+-- }
 

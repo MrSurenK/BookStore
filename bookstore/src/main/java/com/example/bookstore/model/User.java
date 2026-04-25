@@ -1,9 +1,8 @@
 package com.example.bookstore.model;
 
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.context.support.BeanDefinitionDsl;
 
 @Data
 @Entity
@@ -16,7 +15,9 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(unique = true, nullable = false)
+    // do not expose password in JSON responses; stored encoded in DB
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

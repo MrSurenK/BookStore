@@ -9,6 +9,7 @@ import com.example.bookstore.model.Book;
 import com.example.bookstore.service.BookService;
 import com.example.bookstore.utility.ValidISBN;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class BookController {
     }
 
     @PostMapping("/addNew")
+    @PreAuthorize("hasAnyRole('MANAGER','OWNER')")
     public ResponseEntity<Res<Object>> addNewBook(@RequestBody AddNewBookDTO request){
 
         //call service to add new book
@@ -39,6 +41,7 @@ public class BookController {
 
 
     @PatchMapping("/updateBook")
+    @PreAuthorize("hasAnyRole('MANAGER','OWNER')")
     public ResponseEntity<Res<Object>> updateExistingBook(@Valid @RequestBody UpdateBookDTO updateBookDTO){
         bookService.updateBook(updateBookDTO);
 
@@ -59,6 +62,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{isbn}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Res<Object>> deleteBookApi(@PathVariable  @ValidISBN String isbn){
 
         bookService.deleteBook(isbn);
