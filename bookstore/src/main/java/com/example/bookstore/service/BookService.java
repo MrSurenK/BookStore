@@ -3,6 +3,7 @@ package com.example.bookstore.service;
 
 import com.example.bookstore.dto.AddNewBookDTO;
 import com.example.bookstore.dto.AuthorIdentifierDTO;
+import com.example.bookstore.dto.BookResponseDTO;
 import com.example.bookstore.dto.UpdateBookDTO;
 import com.example.bookstore.model.Author;
 import com.example.bookstore.model.Book;
@@ -12,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.bookstore.mapper.BookMapper;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -38,6 +40,8 @@ public class BookService {
 
         Set<Author> authors = checkAuthors(newBookDetails.authors());
 
+        log.debug("Checking authors: {} ", authors);
+
         //Map new books details to book to create new book
        Book newBook =  Book.builder()
                         .isbn(newBookDetails.isbn())
@@ -49,6 +53,7 @@ public class BookService {
                                                             .build();
 
         bookRepo.save(newBook); //save new book
+        log.info("Book added");
     }
 
 
@@ -82,21 +87,21 @@ public class BookService {
 
         //Check if book exists
         log.info("Finding book with isbn: {}", isbn);
-        Book book = bookRepo.findBookByIdAndIsDeletedFalse(isbn)
+        Book book = bookRepo.findBookByIsbnAndIsDeletedFalse(isbn)
                 .orElseThrow(() -> new EntityNotFoundException("Can't book with this isbn: " + isbn));
 
         log.info("Updating book with isbn : {}  ", isbn);
 
         //Update book
         //Validate authors if updating authors
-        if (updateBookDTO.authors() != null) {
+        if (updateBookDTO.authors() != null && !updateBookDTO.authors().isEmpty()) {
             Set<Author>resolvedAuthors = checkAuthors(updateBookDTO.authors());
             book.setAuthors(resolvedAuthors);
             log.info("Updated authors: {}", resolvedAuthors);
         }
 
         //Check which fields to update
-        if (updateBookDTO.title() != null) {
+        if (updateBookDTO.title() != null && !updateBookDTO.title().isBlank()) {
             book.setTitle(updateBookDTO.title());
             log.info("Updated title: {}", updateBookDTO.title());
         }
@@ -113,17 +118,17 @@ public class BookService {
             log.info("Updated price : {}", updateBookDTO.price());
         }
 
-        if(updateBookDTO.genre() != null){
+        if(updateBookDTO.genre() != null && !updateBookDTO.genre().isBlank()){
             book.setGenre(updateBookDTO.genre());
             log.info("Updated genre: {}", updateBookDTO.genre());
         }
 
-        bookRepo.save(book);
+//        bookRepo.save(book);
         log.info("Book has been successfully updated and saved to database!");
     }
 
 
-    public List<Book> findBook(String title, List<String>authorNames){
+    public List<BookResponseDTO> findBook(String title, List<String>authorNames){
         log.info("Looking for books....");
         // Normalize title
         if (title != null && title.isBlank()) {
@@ -153,13 +158,13 @@ public class BookService {
         }
 
         log.info("Found {} book(s)", books.size());
-        return books;
+        return books.stream().map(BookMapper::toDTO).toList();
     }
 
 
     public void deleteBook(String isbn){
         //ISBN numbers validated at controller layer
-        Book book = bookRepo.findBookByIdAndIsDeletedFalse(isbn).orElseThrow(()-> new EntityNotFoundException("No such book found in store"));
+        Book book = bookRepo.findBookByIsbnAndIsDeletedFalse(isbn).orElseThrow(()-> new EntityNotFoundException("No such book found in store"));
         log.info("Attempting to delete book : {}" , isbn);
         book.setDeleted(true);
         bookRepo.save(book);
@@ -167,8 +172,11 @@ public class BookService {
     }
 
 
-    public List<Book> getAllBooks(){
+    public List<BookResponseDTO> getAllBooks(){
         log.info("Getting all books in store");
-       return bookRepo.getAllNonDeletedBooks();
+        List<Book> books = bookRepo.getAllNonDeletedBooks();
+            return books.stream()
+            .map(BookMapper::toDTO)
+            .toList();
     }
 }

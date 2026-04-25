@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Builder
+@Getter
 @Entity
 @Table(
         name="author",
@@ -29,7 +30,7 @@ public class Author {
     @Column(nullable = false)
     private LocalDate birthday;
 
-    @ManyToMany(mappedBy = "authors")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "authors")
     private Set<Book> books = new HashSet<>(); //Since using builder pattern initialise empty hashset first to prevent errors
     //User will first initialize empty book for new author and add author in Book table
 }

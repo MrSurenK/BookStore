@@ -21,6 +21,7 @@ public record UpdateBookDTO(
         Integer year, //validate yaer
 
         @Positive(message = "Please provide a valid price")
+        @Digits(integer = 10, fraction = 2, message = "Price can have max 2 decimal places")
         Double price,
 
         String genre

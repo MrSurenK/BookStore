@@ -10,8 +10,8 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
 @Setter
+@Getter
 @Builder
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +28,7 @@ public class Book {
     private String title;
 
     @NotEmpty(message = "A book must have at least one author")
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name="book_author",
             joinColumns = @JoinColumn(name="book_isbn"),
@@ -45,15 +45,7 @@ public class Book {
     @Column(nullable = false)
     private String genre;
 
-    @Column(nullable = false)
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private boolean isDeleted = false; //Defaults to false
-
-    //Check that this is field not empty or null before saving to DB a new record or an update
-    @PrePersist
-    @PreUpdate
-    private void validate() throws IllegalAccessException {
-        if(authors == null || authors.isEmpty()){
-            throw new IllegalAccessException("Book must be authored by someone!");
-        }
-    }
 }
