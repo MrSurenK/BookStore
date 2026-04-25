@@ -72,33 +72,52 @@ public class BookService {
 
     //Service to update an existing book
     @Transactional
-    public void updateBook(UpdateBookDTO updateBookDTO){
+    public void updateBook(UpdateBookDTO updateBookDTO) {
+
+        log.info("Attempting to update book");
 
         String isbn = updateBookDTO.isbn(); //get book isbn
 
-         //Check if book exists
+        //Check if book exists
         log.info("Finding book with isbn: {}", isbn);
         Book book = bookRepo.findBookByIdAndIsDeletedFalse(isbn)
-                .orElseThrow(()-> new EntityNotFoundException("Can't book with this isbn: " + isbn));
+                .orElseThrow(() -> new EntityNotFoundException("Can't book with this isbn: " + isbn));
+
+        log.info("Updating book with isbn : {}  ", isbn);
 
         //Update book
         //Validate authors if updating authors
-        Set<Author> resolvedAuthors = null;
-        if(updateBookDTO.authors() != null){
-            resolvedAuthors = checkAuthors(updateBookDTO.authors());
+        if (updateBookDTO.authors() != null) {
+            Set<Author>resolvedAuthors = checkAuthors(updateBookDTO.authors());
+            book.setAuthors(resolvedAuthors);
+            log.info("Updated authors: {}", resolvedAuthors);
         }
 
         //Check which fields to update
-        if(updateBookDTO.title() != null){
+        if (updateBookDTO.title() != null) {
             book.setTitle(updateBookDTO.title());
+            log.info("Updated title: {}", updateBookDTO.title());
         }
 
-//        if(updateBookDTO.year() != null){
-//            //validate that year is a valid year
+        if (updateBookDTO.year() != null) {
+            //validate that year is a valid year
 
             book.setYear(updateBookDTO.year());
+            log.info("Updated year: {}", updateBookDTO.year());
         }
 
+        if(updateBookDTO.price() != null){
+            book.setPrice(updateBookDTO.price());
+            log.info("Updated price : {}", updateBookDTO.price());
+        }
 
+        if(updateBookDTO.genre() != null){
+            book.setGenre(updateBookDTO.genre());
+            log.info("Updated genre: {}", updateBookDTO.genre());
+        }
 
+        bookRepo.save(book);
+        log.info("Book has been successfully updated and saved to database!");
     }
+
+}

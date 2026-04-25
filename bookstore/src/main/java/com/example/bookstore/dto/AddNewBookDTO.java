@@ -2,6 +2,7 @@ package com.example.bookstore.dto;
 
 import com.example.bookstore.model.Author;
 import com.example.bookstore.utility.ValidISBN;
+import com.example.bookstore.utility.ValidYear;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -22,7 +23,8 @@ public record AddNewBookDTO(
         Set<AuthorIdentifierDTO> authors,//need to give author name and birthday to find the right author
 
         @NotNull(message = "When was the book published?")
-        @Min(0)
+        @Min(value = 1000, message="Year must be valid")
+        @ValidYear
         int year,
 
         @NotNull(message = "How much is this book?")

@@ -1,5 +1,6 @@
 package com.example.bookstore.dto;
 
+import com.example.bookstore.utility.ValidYear;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -15,10 +16,12 @@ public record UpdateBookDTO(
         @Valid
         Set<AuthorIdentifierDTO> authors,//need to give author name and birthday to find the right author
 
-        int year, //validate yaer
+        @Min(value = 1000, message = "Year must be valid")
+        @ValidYear
+        Integer year, //validate yaer
 
         @Positive(message = "Please provide a valid price")
-        double price,
+        Double price,
 
         String genre
 ) {
