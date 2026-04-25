@@ -13,9 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -119,5 +119,42 @@ public class BookService {
         bookRepo.save(book);
         log.info("Book has been successfully updated and saved to database!");
     }
+
+
+    public List<Book> findBook(String title, List<String>authorNames){
+        log.info("Looking for books....");
+        // Normalize title
+        if (title != null && title.isBlank()) {
+            title = null;
+        }
+
+        //Normalize author names
+        if(authorNames != null){
+            authorNames = authorNames.stream()
+                    .filter(name -> name != null && !name.isBlank())
+                    .map(String::toLowerCase)
+                    .toList();
+
+            if(authorNames.isEmpty()){
+                authorNames = null;
+            }
+        }
+
+        // Log AFTER normalization
+        log.info("Searching books with title='{}' and authors={}", title, authorNames); //if null we can see here in our logs
+
+        //Execute
+        List<Book> books = bookRepo.searchBooks(title, authorNames);
+
+        if (books.isEmpty()){
+            log.info("No books found for given criteria.");
+        }
+
+        log.info("Found {} book(s)", books.size());
+        return books;
+    }
+
+
+
 
 }
